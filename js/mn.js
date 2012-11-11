@@ -1,6 +1,6 @@
 var player;
 
-var HOST = 'http://static.kevintechnology.com/mn/';
+var HOST = 'http://kevincon.github.com/movienight/';
 
 function showParticipants() {
 	var participants = gapi.hangout.getParticipants();
