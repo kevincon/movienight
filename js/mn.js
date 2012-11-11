@@ -54,13 +54,16 @@ function playerInit() {
 /* Force the video player to match the state in sharedState */
 function playerUpdate() {
 	if (mn_state.positionFresh) {
+		console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
 		mn_player.setPlayhead(mn_state.position);
 		mn_state.positionFresh = false;
 	}
 
 	if (mn_state.playing) {
+		console.log('playerUpdate: Setting to play.');
 		mn_player.setPlay();
 	} else {
+		console.log('playerUpdate: Setting to pause.');
 		mn_player.setPause();
 	}
 
@@ -74,6 +77,7 @@ function stateUpdated(event) {
 		return;
 	}
 
+	console.log('stateUpdated: Copying updated Google Hangout state to local copy.');
 	mn_state = jQuery.parseJSON(rawState);
 
 	playerUpdate();
@@ -81,6 +85,7 @@ function stateUpdated(event) {
 
 /* Update the Google Hangout state */
 function updateState() {
+	console.log('updateState: Updating Google Hangout state.')
 	gapi.hangout.data.submitDelta({'AppState': JSON.stringify(mn_state)});
 }
 
@@ -91,9 +96,6 @@ function init() {
 				if (eventObj.isApiReady) {
 					document.getElementById('showParticipants')
 						.style.visibility = 'visible';
-
-					gapi.hangout.data.onStateChanged.add(stateUpdated);
-					stateUpdated();
 				}
 			});
 }
@@ -103,4 +105,6 @@ gadgets.util.registerOnLoadHandler(init);
 
 $(document).ready(function() {
 	playerInit();
+	gapi.hangout.data.onStateChanged.add(stateUpdated);
+	stateUpdated();
 });
