@@ -37,7 +37,7 @@ function playerStateChanged(newState) {
 }
 
 function playerSeekChanged(position) {
-	console.log('Player seeked to' + position);
+	console.log('Player seeked to' + position.toString());
 }
 
 function playerInit() {
