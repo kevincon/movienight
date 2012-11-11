@@ -21,6 +21,8 @@ function showParticipants() {
 	var div = document.getElementById('participantsDiv');
 
 	div.innerHTML = retVal;
+
+	console.log('got to showParticipants');
 }
 
 function playerStateChanged(newState) {
