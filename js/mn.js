@@ -36,6 +36,10 @@ function playerStateChanged(newState) {
 	}
 }
 
+function playerSeekChanged(position) {
+	console.log('Player seeked to' + position);
+}
+
 function playerInit() {
 	player = projekktor('#player', {
 						volume: 0.8,
@@ -43,6 +47,7 @@ function playerInit() {
 						playerFlashMP3: HOST + 'jarisplayer.swf'
 					});
 	player.addListener('state', playerStateChanged);
+	player.addListener('seek', playerSeekChanged);
 }
 
 function init() {
