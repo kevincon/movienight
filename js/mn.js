@@ -14,14 +14,14 @@ function playerStateChanged(newState) {
 	switch (newState) {
 		case 'PLAYING':
 			console.log('Playing');
-			if (!mn_state.playing) {
+			if (mn_state.playing == false) {
 				mn_state.playing = true;
 				updateState();
 			}
 			break;
 		case 'PAUSED':
 			console.log('Paused');
-			if (mn_state.playing) {
+			if (mn_state.playing == true) {
 				mn_state.playing = false;
 				updateState();
 			}
@@ -85,8 +85,10 @@ function stateUpdated(event) {
 
 /* Update the Google Hangout state */
 function updateState() {
-	console.log('updateState: Updating Google Hangout state.')
+	console.log('updateState: Updating Google Hangout state.');
 	gapi.hangout.data.submitDelta({'AppState': JSON.stringify(mn_state)});
+	console.log('Dump of App State:');
+	console.log(JSON.stringify(mn_state));
 }
 
 function init() {
