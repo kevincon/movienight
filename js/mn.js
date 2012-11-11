@@ -49,6 +49,8 @@ function playerInit() {
 					});
 	mn_player.addListener('state', playerStateChanged);
 	mn_player.addListener('seek', playerSeekChanged);
+
+	mn_state = new AppState();
 }
 
 /* Force the video player to match the state in sharedState */
@@ -78,17 +80,18 @@ function stateUpdated(event) {
 	}
 
 	console.log('stateUpdated: Copying updated Google Hangout state to local copy.');
-	mn_state = jQuery.parseJSON(rawState);
+	mn_state = JSON.parse(rawState);
 
 	playerUpdate();
 }
 
 /* Update the Google Hangout state */
 function updateState() {
+	var stateString = JSON.stringify(mn_state);
 	console.log('updateState: Updating Google Hangout state.');
-	gapi.hangout.data.submitDelta({'AppState': JSON.stringify(mn_state)});
+	gapi.hangout.data.submitDelta({'AppState': stateString});
 	console.log('Dump of App State:');
-	console.log(JSON.stringify(mn_state));
+	console.log(stateString);
 }
 
 function init() {
