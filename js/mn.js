@@ -55,6 +55,8 @@ function playerSeekChanged(newPosition) {
 function playerInit() {
 	mn_player = projekktor('#player', {
 						volume: 0.8,
+						streamType: 'pseudo',
+						startParameter: 'start',
 						playerFlashMP4: HOST + 'flash/jarisplayer.swf',
 						playerFlashMP3: HOST + 'flash/jarisplayer.swf'
 					});
