@@ -15,16 +15,21 @@ function playerStateChanged(newState) {
 	if (newState == 'PLAYING') {
 		if (mn_state.playing == false) {
 			mn_state.playing = true;
+			mn_state.position = mn_player.getPosition();
+			mn_state.positionFresh = true;
 			updateState();
+			mn_state.positionFresh = false;
 		}
 	} else if (newState == 'PAUSED' || newState == 'COMPLETED') {
 		if (mn_state.playing == true) {
 			mn_state.playing = false;
+			mn_state.position = mn_player.getPosition();
+			mn_state.positionFresh = true;
 			if (newState == 'COMPLETED') {
 				mn_state.position = 0;
-				mn_state.positionFresh = true;
 			}
 			updateState();
+			mn_state.positionFresh = false;
 		}
 	}
 }
