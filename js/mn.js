@@ -1,5 +1,5 @@
 var HOST = 'http://kevincon.github.com/movienight/';
-//test
+
 var mn_player;
 var mn_state;
 
@@ -31,6 +31,9 @@ function playerStateChanged(newState) {
 
 /* Callback for when video player is seeked. */
 function playerSeekChanged(dummy) {
+	if (mn_state.positionFresh)
+		return;
+
 	var newPosition = mn_player.getPosition();
 	console.log('Seeked to ' + newPosition);
 
