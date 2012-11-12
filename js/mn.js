@@ -35,14 +35,13 @@ function playerStateChanged(newState) {
 }
 
 /* Callback for when video player is seeked. */
-function playerSeekChanged(dummy) {
+function playerSeekChanged(newPosition) {
 	if (mn_state.positionFresh) {
 		console.log('playerSeekChanged: positionFresh was true, returning.');
 		return;
 	}
 
-	var newPosition = mn_player.getPosition();
-	newPosition = mn_player.getPosition(); //two for the money?
+	//var newPosition = mn_player.getPosition();
 	console.log('Seeked to ' + newPosition);
 
 	mn_state.position = newPosition;
