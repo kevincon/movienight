@@ -1,5 +1,5 @@
 var HOST = 'http://kevincon.github.com/movienight/';
-
+//test
 var mn_player;
 var mn_state;
 
