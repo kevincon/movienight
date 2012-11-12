@@ -42,6 +42,7 @@ function playerSeekChanged(dummy) {
 	}
 
 	var newPosition = mn_player.getPosition();
+	newPosition = mn_player.getPosition(); //two for the money?
 	console.log('Seeked to ' + newPosition);
 
 	mn_state.position = newPosition;
