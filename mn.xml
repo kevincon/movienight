@@ -46,8 +46,7 @@
 <h3>Movie Night</h3>
 
 <video id="player" class="projekktor" width="640" height="360" controls>
-    <source src="http://kevincon.github.com/movienight/media/intro.ogv" type="video/ogg" />
-    <source src="http://kevincon.github.com/movienight/media/intro.mp4" type="video/mp4" />
+    <source src="http://kevincon.github.com/movienight/media/shark.ogv" type="video/ogg" />
 </video>
 
 <p>
