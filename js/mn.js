@@ -131,8 +131,10 @@ function init() {
 			});
 }
 
-// Wait for gadget to load.                                                       
-gadgets.util.registerOnLoadHandler(init);
+$(document).ready(function() {
+	// Wait for gadget to load.                                                       
+	gadgets.util.registerOnLoadHandler(init);
 
-// Wait for jwplayer to load.
-jwplayer().onReady(playerInit);
+	// Wait for jwplayer to load.
+	jwplayer().onReady(playerInit);
+});
