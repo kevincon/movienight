@@ -47,8 +47,8 @@ function playerSeekChanged(dummy) {
 function playerInit() {
 	mn_player = projekktor('#player', {
 						volume: 0.8,
-						playerFlashMP4: HOST + 'jarisplayer.swf',
-						playerFlashMP3: HOST + 'jarisplayer.swf'
+						playerFlashMP4: HOST + 'flash/jarisplayer.swf',
+						playerFlashMP3: HOST + 'flash/jarisplayer.swf'
 					});
 	mn_player.addListener('state', playerStateChanged);
 	mn_player.addListener('seek', playerSeekChanged);
