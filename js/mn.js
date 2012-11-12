@@ -76,9 +76,10 @@ function playerInit() {
 	mn_player.onSeek(playerWasSeeked);
 	mn_player.onIdle(playerWasPaused);
 
-	mn_state = new AppState();
+	// Wait for jwplayer to load before updating state.
+	mn_player().onReady(stateUpdated);
 
-	stateUpdated();
+	mn_state = new AppState();
 }
 
 /* Force the video player to match the state in sharedState */
@@ -135,6 +136,6 @@ $(document).ready(function() {
 	// Wait for gadget to load.                                                       
 	gadgets.util.registerOnLoadHandler(init);
 
-	// Wait for jwplayer to load.
-	jwplayer().onReady(playerInit);
+	// Initialize player.
+	playerInit();
 });
