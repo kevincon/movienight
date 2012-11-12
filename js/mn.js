@@ -63,7 +63,6 @@ function playerWasSeeked(event) {
 /* Initialize player, register callbacks */
 function playerInit() {
 	jwplayer('mn_player').setup({
-		html5player: HOST + 'jwplayer.html5.js',
 		flashplayer: HOST + 'jwplayer/jwplayer.flash.swf',
 		file: HOST + 'media/shark.ogv',
 		height: 360,
@@ -77,7 +76,7 @@ function playerInit() {
 	mn_player.onIdle(playerWasPaused);
 
 	// Wait for jwplayer to load before updating state.
-	mn_player().onReady(stateUpdated);
+	mn_player.onReady(stateUpdated);
 
 	mn_state = new AppState();
 }
