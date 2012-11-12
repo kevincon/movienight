@@ -9,79 +9,93 @@ function AppState() {
 	this.position = 0;
 }
 
-/* Callback for when video player's state changes. */
-function playerStateChanged(newState) {
-	console.log('playerStateChanged: ' + newState);
-	if (newState == 'PLAYING') {
-		if (mn_state.playing == false) {
-			mn_state.playing = true;
-			mn_state.position = mn_player.getPosition();
-			mn_state.positionFresh = true;
-			updateState();
-			mn_state.positionFresh = false;
-		}
-	} else if (newState == 'PAUSED' || newState == 'COMPLETED') {
-		if (mn_state.playing == true) {
-			mn_state.playing = false;
-			mn_state.position = mn_player.getPosition();
-			mn_state.positionFresh = true;
-			if (newState == 'COMPLETED') {
-				mn_state.position = 0;
-			}
-			updateState();
-			mn_state.positionFresh = false;
-		}
-	}
-}
-
-/* Callback for when video player is seeked. */
-function playerSeekChanged(newPosition) {
-	if (mn_state.positionFresh) {
-		console.log('playerSeekChanged: positionFresh was true, returning.');
+/* Callback for when player starts playing. */
+function playerStartedPlaying(event) {
+	console.log('Set to play.');
+	if (mn_state.playing == true) {
+		console.log('Already playing, ignoring event.');
 		return;
 	}
 
-	//var newPosition = mn_player.getPosition();
+	mn_state.playing = true;
+	mn_state.position = mn_player.getPosition();
+	mn_state.positionFresh = true;
+
+	updateState();
+
+	mn_state.positionFresh = false;
+}
+
+/* Callback for when player is paused. */
+function playerWasPaused(event) {
+	console.log('Set to pause.');
+	if (mn_state.playing == false) {
+		console.log('Already paused, ignoring event.');
+		return;
+	}
+
+	mn_state.playing = false;
+	mn_state.position = mn_player.getPosition();
+	mn_state.positionFresh = true;
+
+	updateState();
+
+	mn_state.positionFresh = false;
+}
+
+/* Callback for when player is seeked. */
+function playerWasSeeked(event) {
+	if (mn_state.positionFresh) {
+		console.log('playerWasSeeked: positionFresh was true, returning.');
+		return;
+	}
+	var newPosition = event.position + event.offset;
 	console.log('Seeked to ' + newPosition);
 
 	mn_state.position = newPosition;
 	mn_state.positionFresh = true;
 
 	updateState();
+
 	mn_state.positionFresh = false;
 }
 
 /* Initialize player, register callbacks */
 function playerInit() {
-	mn_player = projekktor('#player', {
-						volume: 0.8,
-						streamType: 'pseudo',
-						startParameter: 'start',
-						playerFlashMP4: HOST + 'flash/jarisplayer.swf',
-						playerFlashMP3: HOST + 'flash/jarisplayer.swf'
-					});
-	mn_player.addListener('state', playerStateChanged);
-	mn_player.addListener('seek', playerSeekChanged);
+	jwplayer('mn_player').setup({
+		html5player: HOST + 'jwplayer.html5.js',
+		flashplayer: HOST + 'jwplayer/jwplayer.flash.swf',
+		file: HOST + 'media/shark.ogv',
+		height: 360,
+		width: 640
+	});
+
+	mn_player = jwplayer('mn_player');
+	mn_player.onPlay(playerStartedPlaying);
+	mn_player.onPause(playerWasPaused);
+	mn_player.onSeek(playerWasSeeked);
+	mn_player.onIdle(playerWasPaused);
 
 	mn_state = new AppState();
+
+	stateUpdated();
 }
 
 /* Force the video player to match the state in sharedState */
 function playerUpdate() {
 	if (mn_state.positionFresh) {
 		console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
-		mn_player.setPlayhead(mn_state.position);
+		mn_player.seek(mn_state.position);
 		mn_state.positionFresh = false;
 	}
 
 	if (mn_state.playing) {
 		console.log('playerUpdate: Setting to play.');
-		mn_player.setPlay();
+		mn_player.play(true);
 	} else {
 		console.log('playerUpdate: Setting to pause.');
-		mn_player.setPause();
+		mn_player.pause(true);
 	}
-
 }
 
 /* Extract the AppState from the Google Hangout state */
@@ -112,8 +126,7 @@ function init() {
 	gapi.hangout.onApiReady.add(
 			function(eventObj) {
 				if (eventObj.isApiReady) {
-					document.getElementById('showParticipants')
-						.style.visibility = 'visible';
+					gapi.hangout.data.onStateChanged.add(stateUpdated);
 				}
 			});
 }
@@ -121,8 +134,5 @@ function init() {
 // Wait for gadget to load.                                                       
 gadgets.util.registerOnLoadHandler(init);
 
-$(document).ready(function() {
-	playerInit();
-	gapi.hangout.data.onStateChanged.add(stateUpdated);
-	stateUpdated();
-});
+// Wait for jwplayer to load.
+jwplayer().onReady(playerInit);
