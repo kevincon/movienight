@@ -11,21 +11,21 @@ function AppState() {
 
 /* Callback for when video player's state changes. */
 function playerStateChanged(newState) {
-	switch (newState) {
-		case 'PLAYING':
-			console.log('Playing');
-			if (mn_state.playing == false) {
-				mn_state.playing = true;
-				updateState();
+	console.log('playerStateChanged: ' + newState);
+	if (newState == 'PLAYING') {
+		if (mn_state.playing == false) {
+			mn_state.playing = true;
+			updateState();
+		}
+	} else if (newState == 'PAUSED' || newState == 'COMPLETED') {
+		if (mn_state.playing == true) {
+			mn_state.playing = false;
+			if (newState == 'COMPLETED') {
+				mn_state.position = 0;
+				mn_state.positionFresh = true;
 			}
-			break;
-		case 'PAUSED':
-			console.log('Paused');
-			if (mn_state.playing == true) {
-				mn_state.playing = false;
-				updateState();
-			}
-			break;
+			updateState();
+		}
 	}
 }
 
