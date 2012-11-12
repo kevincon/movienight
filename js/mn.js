@@ -41,6 +41,7 @@ function playerSeekChanged(dummy) {
 	mn_state.positionFresh = true;
 
 	updateState();
+	mn_state.positionFresh = false;
 }
 
 /* Initialize player, register callbacks */
