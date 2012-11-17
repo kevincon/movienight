@@ -41,11 +41,16 @@ function playerWasPaused() {
 	//mn_state.positionFresh = false;
 }
 
+function onPlayerWaiting() {
+	console.log('onPlayerWaiting: fired');
+}
+
 function onPlayerLoadedData() {
 	if (mn_state === undefined) {
 		mn_player.addEvent('play', playerStartedPlaying);
 		mn_player.addEvent('pause', playerWasPaused);
 		//mn_player.addEvent('timeupdate', playerWasSeeked);
+		mn_player.addEvent('waiting', onPlayerWaiting);
 		mn_player.addEvent('ended', playerWasPaused);
 		initState();
 	}
