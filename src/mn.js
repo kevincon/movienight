@@ -5,7 +5,7 @@ var mn_state;
 
 function AppState() {
 	this.playing = false;
-	this.positionFresh = false; // Is position fresh?
+	//this.positionFresh = false; // Is position fresh?
 	this.position = 0;
 }
 
@@ -20,9 +20,9 @@ function playerStartedPlaying(event) {
 	mn_state.playing = true;
 	var position = mn_player.currentTime();
 	mn_state.position = position;
-	mn_state.positionFresh = true;
+	//mn_state.positionFresh = true;
 	updateState();
-	mn_state.positionFresh = false;
+	//mn_state.positionFresh = false;
 }
 
 /* Callback for when player is paused. */
@@ -36,12 +36,13 @@ function playerWasPaused(event) {
 	mn_state.playing = false;
 	var position = mn_player.currentTime();
 	mn_state.position = position;
-	mn_state.positionFresh = true;
+	//mn_state.positionFresh = true;
 	updateState();
-	mn_state.positionFresh = false;
+	//mn_state.positionFresh = false;
 }
 
 /* Callback for when player is seeked. */
+/*
 function playerWasSeeked(e, api) {
 	if (mn_state.positionFresh) {
 		console.log('playerWasSeeked: positionFresh was true, returning.');
@@ -61,6 +62,7 @@ function playerWasSeeked(e, api) {
 
 	mn_state.positionFresh = false;
 }
+*/
 
 /* Initialize player, register callbacks */
 function playerInit() {
@@ -71,19 +73,20 @@ function playerInit() {
 	mn_player.addEvent('pause', playerWasPaused);
 	//mn_player.addEvent('timeupdate', playerWasSeeked);
 	mn_player.addEvent('ended', playerWasPaused);
-
-	if (mn_state === undefined) {
-		mn_state = new AppState();
-	}
 }
 
 /* Force the video player to match the state in sharedState */
 function playerUpdate() {
+	/*
 	if (mn_state.positionFresh) {
 		console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
 		mn_player.currentTime(mn_state.position);
 		mn_state.positionFresh = false;
 	}
+	*/
+
+	console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
+	mn_player.currentTime(mn_state.position);
 
 	if (mn_state.playing && mn_player.paused) {
 		console.log('playerUpdate: Setting to play.');
@@ -105,7 +108,9 @@ function stateUpdated(event) {
 	console.log('stateUpdated: Copying updated Google Hangout state to local copy.');
 	mn_state = JSON.parse(rawState);
 
-	playerUpdate();
+	if (mn_player == undefined) {
+		playerUpdate();
+	}
 }
 
 /* Update the Google Hangout state */
@@ -123,15 +128,19 @@ function init() {
 			function(eventObj) {
 				if (eventObj.isApiReady) {
 					gapi.hangout.data.onStateChanged.add(stateUpdated);
+					stateUpdated();
+					if (mn_state === undefined) {
+						mn_state = new AppState();
+					}
+					updateState();
 				}
-				stateUpdated();
 			});
 }
 
-$(document).ready(function() {
-	// Wait for gadget to load.
-	gadgets.util.registerOnLoadHandler(init);
+// Wait for gadget to load.
+gadgets.util.registerOnLoadHandler(init);
 
+$(document).ready(function() {
 	_V_.options.flash.swf = HOST + 'flash/video-js.swf';
 
 	_V_("mn_player", {}, function(){
