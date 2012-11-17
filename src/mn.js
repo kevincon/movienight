@@ -1,4 +1,4 @@
-var HOST = 'http://kevincon.github.com/movienight/';
+var HOST = 'http://static.kevintechnology.com/mn/';
 
 var mn_player;
 var mn_state;
@@ -18,11 +18,10 @@ function playerStartedPlaying(event) {
 	}
 
 	mn_state.playing = true;
-	mn_state.position = mn_player.getPosition();
+	var position = mn_player.currentTime();
+	mn_state.position = position;
 	mn_state.positionFresh = true;
-
 	updateState();
-
 	mn_state.positionFresh = false;
 }
 
@@ -35,21 +34,24 @@ function playerWasPaused(event) {
 	}
 
 	mn_state.playing = false;
-	mn_state.position = mn_player.getPosition();
+	var position = mn_player.currentTime();
+	mn_state.position = position;
 	mn_state.positionFresh = true;
-
 	updateState();
-
 	mn_state.positionFresh = false;
 }
 
 /* Callback for when player is seeked. */
-function playerWasSeeked(event) {
+function playerWasSeeked(e, api) {
 	if (mn_state.positionFresh) {
 		console.log('playerWasSeeked: positionFresh was true, returning.');
 		return;
 	}
-	var newPosition = event.position + event.offset;
+	var newPosition = mn_player.video.time;
+	if (newPosition === undefined) {
+		console.log('playerWasSeeked: newPosition was undefined');
+		return;
+	}
 	console.log('Seeked to ' + newPosition);
 
 	mn_state.position = newPosition;
@@ -62,39 +64,33 @@ function playerWasSeeked(event) {
 
 /* Initialize player, register callbacks */
 function playerInit() {
-	jwplayer('mn_player').setup({
-		flashplayer: HOST + 'flash/jwplayer.flash.swf',
-		file: HOST + 'media/shark.ogv',
-		height: 360,
-		width: 640
-	});
 
-	mn_player = jwplayer('mn_player');
-	mn_player.onPlay(playerStartedPlaying);
-	mn_player.onPause(playerWasPaused);
-	mn_player.onSeek(playerWasSeeked);
-	mn_player.onIdle(playerWasPaused);
+	mn_player = _V_('mn_player');
 
-	// Wait for jwplayer to load before updating state.
-	mn_player.onReady(stateUpdated);
+	mn_player.addEvent('play', playerStartedPlaying);
+	mn_player.addEvent('pause', playerWasPaused);
+	//mn_player.addEvent('timeupdate', playerWasSeeked);
+	mn_player.addEvent('ended', playerWasPaused);
 
-	mn_state = new AppState();
+	if (mn_state === undefined) {
+		mn_state = new AppState();
+	}
 }
 
 /* Force the video player to match the state in sharedState */
 function playerUpdate() {
 	if (mn_state.positionFresh) {
 		console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
-		mn_player.seek(mn_state.position);
+		mn_player.currentTime(mn_state.position);
 		mn_state.positionFresh = false;
 	}
 
-	if (mn_state.playing) {
+	if (mn_state.playing && mn_player.paused) {
 		console.log('playerUpdate: Setting to play.');
-		mn_player.play(true);
+		mn_player.play();
 	} else {
 		console.log('playerUpdate: Setting to pause.');
-		mn_player.pause(true);
+		mn_player.pause();
 	}
 }
 
@@ -128,6 +124,7 @@ function init() {
 				if (eventObj.isApiReady) {
 					gapi.hangout.data.onStateChanged.add(stateUpdated);
 				}
+				stateUpdated();
 			});
 }
 
@@ -135,6 +132,11 @@ $(document).ready(function() {
 	// Wait for gadget to load.
 	gadgets.util.registerOnLoadHandler(init);
 
-	// Initialize player.
-	playerInit();
+	_V_.options.flash.swf = HOST + 'flash/video-js.swf';
+
+	_V_("mn_player", {}, function(){
+		// Player (this) is initialized and ready.
+		playerInit();
+	});
+
 });
