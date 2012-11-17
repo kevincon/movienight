@@ -10,7 +10,7 @@ function AppState() {
 }
 
 /* Callback for when player starts playing. */
-function playerStartedPlaying(event) {
+function playerStartedPlaying() {
 	console.log('Set to play.');
 	if (mn_state.playing === true) {
 		console.log('Already playing, ignoring event.');
@@ -26,7 +26,7 @@ function playerStartedPlaying(event) {
 }
 
 /* Callback for when player is paused. */
-function playerWasPaused(event) {
+function playerWasPaused() {
 	console.log('Set to pause.');
 	if (mn_state.playing === false) {
 		console.log('Already paused, ignoring event.');
@@ -39,6 +39,25 @@ function playerWasPaused(event) {
 	//mn_state.positionFresh = true;
 	updateState();
 	//mn_state.positionFresh = false;
+}
+
+function onPlayerLoadedData() {
+	if (mn_state === undefined) {
+		mn_player.addEvent('play', playerStartedPlaying);
+		mn_player.addEvent('pause', playerWasPaused);
+		//mn_player.addEvent('timeupdate', playerWasSeeked);
+		mn_player.addEvent('ended', playerWasPaused);
+		initState();
+	}
+}
+
+function initState() {
+	stateUpdated();
+	if (mn_state === undefined) {
+		mn_state = new AppState();
+		updateState();
+	}
+	gapi.hangout.data.onStateChanged.add(stateUpdated);
 }
 
 /* Callback for when player is seeked. */
@@ -68,11 +87,7 @@ function playerWasSeeked(e, api) {
 function playerInit() {
 
 	mn_player = _V_('mn_player');
-
-	mn_player.addEvent('play', playerStartedPlaying);
-	mn_player.addEvent('pause', playerWasPaused);
-	//mn_player.addEvent('timeupdate', playerWasSeeked);
-	mn_player.addEvent('ended', playerWasPaused);
+	mn_player.addEvent('loadeddata', onPlayerLoadedData);
 }
 
 /* Force the video player to match the state in sharedState */
@@ -108,9 +123,7 @@ function stateUpdated(event) {
 	console.log('stateUpdated: Copying updated Google Hangout state to local copy.');
 	mn_state = JSON.parse(rawState);
 
-	if (mn_player == undefined) {
-		playerUpdate();
-	}
+	playerUpdate();
 }
 
 /* Update the Google Hangout state */
@@ -127,25 +140,18 @@ function init() {
 	gapi.hangout.onApiReady.add(
 			function(eventObj) {
 				if (eventObj.isApiReady) {
-					gapi.hangout.data.onStateChanged.add(stateUpdated);
-					stateUpdated();
-					if (mn_state === undefined) {
-						mn_state = new AppState();
-					}
-					updateState();
+					_V_("mn_player", {}, function(){
+						// Player (this) is initialized and ready.
+						playerInit();
+					});
 				}
 			});
 }
 
-// Wait for gadget to load.
-gadgets.util.registerOnLoadHandler(init);
+
 
 $(document).ready(function() {
 	_V_.options.flash.swf = HOST + 'flash/video-js.swf';
 
-	_V_("mn_player", {}, function(){
-		// Player (this) is initialized and ready.
-		playerInit();
-	});
-
+	init();
 });
