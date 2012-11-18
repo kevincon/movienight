@@ -8,6 +8,7 @@ function AppState() {
 	this.playing = false;
 	//this.positionFresh = false; // Is position fresh?
 	this.position = 0;
+	this.url = '';
 }
 
 /* Callback for when player starts playing. */
@@ -44,6 +45,15 @@ function playerWasPaused() {
 
 function onPlayerWaiting() {
 	console.log('onPlayerWaiting: fired');
+}
+
+function onSetSource(event) {
+	var link = event.files[0].url;
+	mn_player.src(link);
+	mn_state.url = link;
+	mn_state.position = 0;
+	mn_state.playing = true;
+	updateState();
 }
 
 function onUserLeave(event) {
@@ -132,13 +142,9 @@ function playerInit() {
 
 /* Force the video player to match the state in sharedState */
 function playerUpdate() {
-	/*
-	if (mn_state.positionFresh) {
-		console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
-		mn_player.currentTime(mn_state.position);
-		mn_state.positionFresh = false;
+	if (mn_player.values.src !== mn_state.url) {
+		mn_player.src(mn_state.url);
 	}
-	*/
 
 	console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
 	if( isTimeFresh(mn_player.currentTime()) ) {
@@ -194,6 +200,8 @@ function init() {
 
 $(document).ready(function() {
 	_V_.options.flash.swf = HOST + 'flash/video-js.swf';
+
+	$('#db-chooser').bind("DbxChooserSuccess", onSetSource);
 
 	init();
 });
