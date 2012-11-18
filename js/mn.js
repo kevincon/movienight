@@ -53,7 +53,7 @@ function onUserLeave(event) {
 }
 
 function isTimeFresh(position) {
-	return abs(mn_state.position - position) > 1;
+	return Math.abs(mn_state.position - position) > 3.5;
 }
 
 function selectReporter() {
