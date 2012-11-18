@@ -2,6 +2,7 @@ var HOST = 'http://static.kevintechnology.com/mn/';
 
 var mn_player;
 var mn_state;
+var mn_reporter;
 
 function AppState() {
 	this.playing = false;
@@ -45,6 +46,35 @@ function onPlayerWaiting() {
 	console.log('onPlayerWaiting: fired');
 }
 
+function onUserLeave(event) {
+	if( gapi.hangout.getParticipantById(mn_reporter) === null ) {
+		mn_reporter = undefined;
+	}
+}
+
+function isTimeFresh(position) {
+	return abs(mn_state.position - position) > 1;
+}
+
+function selectReporter() {
+	var participants = gapi.hangout.getEnabledParticipants();
+	if(participants.length > 0) {
+		mn_reporter = participants[0].id;
+	}
+}
+function onPlayerTimeUpdated() {
+	if(mn_reporter === undefined) {
+		selectReporter();
+	}
+	if(mn_reporter === gapi.hangout.getLocalParticipantId()) {
+		var position = mn_player.currentTime();
+		if( isTimeFresh(position) ) {
+			mn_state.position = position;
+			updateState();
+		}
+	}
+}
+
 function onPlayerLoadedData() {
 	if (mn_state === undefined) {
 		mn_player.addEvent('play', playerStartedPlaying);
@@ -52,9 +82,12 @@ function onPlayerLoadedData() {
 		//mn_player.addEvent('timeupdate', playerWasSeeked);
 		mn_player.addEvent('waiting', onPlayerWaiting);
 		mn_player.addEvent('ended', playerWasPaused);
+		mn_player.addEvent('timeupdate', onPlayerTimeUpdated);
 		initState();
 	}
 }
+
+
 
 function initState() {
 	stateUpdated();
@@ -62,7 +95,9 @@ function initState() {
 		mn_state = new AppState();
 		updateState();
 	}
+
 	gapi.hangout.data.onStateChanged.add(stateUpdated);
+	gapi.hangout.onParticipantsDisabled.add(onUserLeave);
 }
 
 /* Callback for when player is seeked. */
@@ -106,7 +141,9 @@ function playerUpdate() {
 	*/
 
 	console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
-	mn_player.currentTime(mn_state.position);
+	if( isTimeFresh(mn_player.currentTime()) ) {
+		mn_player.currentTime(mn_state.position);
+	}
 
 	if (mn_state.playing && mn_player.paused) {
 		console.log('playerUpdate: Setting to play.');
