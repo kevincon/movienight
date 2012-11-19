@@ -5,7 +5,7 @@ var mn_state;
 var mn_reporter;
 
 function AppState() {
-	this.playing = false;
+	this.playing = true;
 	//this.positionFresh = false; // Is position fresh?
 	this.position = 0;
 	this.url = '';
@@ -48,7 +48,8 @@ function onPlayerWaiting() {
 }
 
 function onSetSource(event) {
-	var link = event.files[0].url;
+	console.log('onSetSource: new source = ' + event.target.value);
+	var link = event.target.value;
 	mn_player.src(link);
 	mn_state.url = link;
 	mn_state.position = 0;
@@ -142,8 +143,10 @@ function playerInit() {
 
 /* Force the video player to match the state in sharedState */
 function playerUpdate() {
-	if (mn_player.values.src !== mn_state.url) {
+	console.log('playerUpdate: src = ' + mn_player.values.src);
+	if (mn_player.values.src !== mn_state.url && mn_state.url !== '') {
 		mn_player.src(mn_state.url);
+		stateUpdated();
 	}
 
 	console.log('playerUpdate: Seeking to ' + mn_state.position + '.');
@@ -201,7 +204,7 @@ function init() {
 $(document).ready(function() {
 	_V_.options.flash.swf = HOST + 'flash/video-js.swf';
 
-	$('#db-chooser').bind("DbxChooserSuccess", onSetSource);
-
 	init();
+
+	$('#db-chooser').bind("DbxChooserSuccess", onSetSource);
 });
